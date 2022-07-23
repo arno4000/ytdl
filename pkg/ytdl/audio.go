@@ -5,23 +5,25 @@ import (
 	"io"
 	"log"
 	"os"
-	"os/exec"
+	"regexp"
 
 	"github.com/kkdai/youtube/v2"
 	"github.com/schollz/progressbar/v3"
 )
 
 func DownloadAudio(id string, path string) {
-	exec.Command("rm", "-rf", "./*.mp3").Run()
-	exec.Command("rm", "-rf", "./*.mp4").Run()
+
 	videoID := id
 	client := youtube.Client{}
 	video, err := client.GetVideo(videoID)
+	fileNameRegex := regexp.MustCompile(`[<>:"\/\|?*^]`)
+	videoName := fileNameRegex.ReplaceAllString(video.Title, "")
+	audioPath := path + "/" + videoName + ".mp3"
 	if err != nil {
 		log.Fatalln(err)
 	}
 	formats := video.Formats
-	audioFile, err := os.Create(path + "/" + video.Title + ".mp3")
+	audioFile, err := os.Create(audioPath)
 	if err != nil {
 		log.Fatalln(err)
 	}
